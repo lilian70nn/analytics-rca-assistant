@@ -41,10 +41,10 @@ Top contributing segments:
 
 Users can ask questions such as:
 
-Explain the anomalies between July and September 2016  
-Why did revenue drop last month?  
-Show the trend of sessions  
-Break down revenue by country  
+- Explain the anomalies between July and September 2016  
+- Why did revenue drop last month?  
+- Show the trend of sessions  
+- Break down revenue by country  
 
 The system automatically determines the correct analysis type.
 
