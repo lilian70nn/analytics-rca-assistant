@@ -163,9 +163,9 @@ pip install -r requirements.txt
 # Running the App
 
 Start the Streamlit dashboard:
-
+```
 streamlit run app/streamlit_app.py
-
+```
 Open the browser interface and ask questions about your data.
 
 
