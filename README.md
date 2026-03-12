@@ -18,21 +18,21 @@ Instead of only detecting that revenue dropped, the system decomposes the metric
 
 Example:
 
-Revenue drop detected on 2016-08-21
+    Revenue drop detected on 2016-08-21
 
 Metric decomposition:
 
-Revenue = Sessions × Conversion Rate × AOV
+    Revenue = Sessions × Conversion Rate × AOV
 
 Primary driver:
 
-Sessions decreased significantly.
+    Sessions decreased significantly.
 
 Top contributing segments:
 
-- Desktop traffic
-- Chrome browser users
-- "(not set)" campaign
+    - Desktop traffic
+    - Chrome browser users
+    - "(not set)" campaign
 
 
 # Features
