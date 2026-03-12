@@ -8,7 +8,7 @@ Users can ask natural language questions about metrics (e.g., revenue, sessions)
 The system combines **data analysis pipelines, anomaly detection, and LLM-based query parsing** with an interactive **Streamlit dashboard**.
 
 
-# What is Root Cause Analysis (RCA)?
+# ABOUT RCA
 
 Root Cause Analysis aims to answer:
 
