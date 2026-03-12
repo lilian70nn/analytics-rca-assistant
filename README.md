@@ -12,7 +12,7 @@ The system combines **data analysis pipelines, anomaly detection, and LLM-based 
 
 Root Cause Analysis aims to answer:
 
-## Why did a metric change?
+**Why did a metric change?**
 
 Instead of only detecting that revenue dropped, the system decomposes the metric and identifies which components and dimensions caused the change.
 
@@ -113,31 +113,36 @@ Streamlit Dashboard
 
 # Directory Structure
 
-analytics_rca/
-  analysis/           # Analysis modules (breakdown, investigation, trends)
-  engine/             # Core analytics engines (anomaly detection, decomposition)
+````markdown
+## Project Structure
 
-app/
-  answer_question.py  # Main orchestration logic
-  streamlit_app.py    # Streamlit dashboard
+```text
+app/                  # Application entrypoints
+  answer_question.py
+  streamlit_app.py
 
-nlp/
-  query_parser.py     # Natural language query parsing
+analytics_rca/        # Core analytics logic
+  analysis/
+  engine/
 
-reporting/
-  report_builder.py   # Report generation
-  ui_builder.py       # UI schema generation
+nlp/                  # Natural language query parsing
+  query_parser.py
 
-visualization/
+reporting/            # Report / UI schema generation
+  report_builder.py
+  ui_builder.py
+
+visualization/        # Charts and investigation views
   trend_charts.py
   breakdown_charts.py
   investigation_views.py
 
-data/
-  loader.py           # BigQuery / dataset loaders
+data/                 # Data access layer
+  loader.py
 
-utils/
-  utils.py            # Shared utility functions
+utils/                # Shared utilities
+  utils.py
+```
 
 
 # Installation
