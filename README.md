@@ -150,7 +150,7 @@ analytics-rca-assistant
 
 Clone the repository
 ```bash
-git clone <repo-url>  
+git clone https://github.com/lilian70nn/analytics-rca-assistant.git  
 cd "analytics-rca-assistant"
 ```
 
