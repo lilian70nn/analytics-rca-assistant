@@ -93,6 +93,7 @@ Built with **Streamlit**, allowing users to:
 
 # System Architecture
 
+```
 User Question  
 ↓  
 Query Parser (LLM)  
@@ -109,61 +110,54 @@ Report Builder
 UI Builder  
 ↓  
 Streamlit Dashboard  
-
-
-# Directory Structure
-
-````markdown
-## Project Structure
-
-```text
-app/                  # Application entrypoints
-  answer_question.py
-  streamlit_app.py
-
-analytics_rca/        # Core analytics logic
-  analysis/
-  engine/
-
-nlp/                  # Natural language query parsing
-  query_parser.py
-
-reporting/            # Report / UI schema generation
-  report_builder.py
-  ui_builder.py
-
-visualization/        # Charts and investigation views
-  trend_charts.py
-  breakdown_charts.py
-  investigation_views.py
-
-data/                 # Data access layer
-  loader.py
-
-utils/                # Shared utilities
-  utils.py
 ```
 
+# Directory Structure
+```
+analytics-rca-assistant
+│
+├── README.md
+├── requirements.txt
+│
+├── app/                      # Application entrypoints
+│   ├── answer_question.py
+│   └── streamlit_app.py
+│
+├── analytics_rca/            # Core analytics logic
+│   ├── analysis/
+│   └── engine/
+│
+├── nlp/                      # Natural language query parsing
+│   └── query_parser.py
+│
+├── reporting/                # Report / UI schema generation
+│   ├── report_builder.py
+│   └── ui_builder.py
+│
+├── visualization/            # Charts and investigation views
+│   ├── trend_charts.py
+│   ├── breakdown_charts.py
+│   └── investigation_views.py
+│
+├── data/                     # Data loading
+│   └── loader.py
+│
+└── utils/                    # Shared utilities
+└── utils.py
+```
 
 # Installation
 
 Clone the repository
-
+```bash
 git clone <repo-url>  
-cd "Merchandise Sales Analysis"
-
-Create virtual environment (optional)
-
-python3 -m venv venv  
-source venv/bin/activate
+cd "analytics-rca-assistant"
+```
 
 Install dependencies
-
+```bash
 pip install -r requirements.txt
-
-If requirements.txt is missing:
-
-pip install streamlit pandas numpy plotly scikit-learn
+```
 
 
 # Running the App
