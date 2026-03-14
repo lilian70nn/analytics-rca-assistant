@@ -12,6 +12,7 @@ from visualization.investigation_views import (
     plot_decomposition_chart,
     build_dimension_table,
     build_driver_table,
+    get_dimension_branches
 )
 
 
@@ -51,8 +52,8 @@ def render_summary_cards(cards):
 def format_driver_option(card):
     date = card.get("date")
     direction = card.get("direction")
-    driver_metric = card.get("driver_metric")
-    return f"{date} | {direction} | {driver_metric}"
+    # driver_metric = card.get("driver_metric")
+    return f"{date} | {direction}"
 
 
 def build_investigation_summary_df(cards):
@@ -156,15 +157,35 @@ def main():
         else:
             st.info("No decomposition chart available.")
 
+        branches = get_dimension_branches(ui, anomaly_index=selected_idx)
+
+        if branches:
+            branch_idx = st.selectbox(
+                "Select metric branch",
+                options=list(range(len(branches))),
+                format_func=lambda i: (
+                    f"{branches[i].get('metric')}"
+                    + (
+                        f" ({branches[i].get('metric_contribution_pct'):.1%})"
+                        if branches[i].get("metric_contribution_pct") is not None else ""
+                    )
+                ),
+                key="selected_metric_branch_idx",
+            )
+        else:
+            branch_idx = 0
+
         st.subheader("Top Dimensions")
-        dimension_df = build_dimension_table(ui, anomaly_index=selected_idx)
+        dimension_df = build_dimension_table(ui, anomaly_index=selected_idx,
+                                             branch_index=branch_idx)
         if dimension_df is not None and not dimension_df.empty:
             st.dataframe(dimension_df, use_container_width=True)
         else:
             st.info("No dimension table available.")
 
         st.subheader("Top Drivers")
-        driver_df = build_driver_table(ui, anomaly_index=selected_idx)
+        driver_df = build_driver_table(ui, anomaly_index=selected_idx,
+                                       branch_index=branch_idx)
         if driver_df is not None and not driver_df.empty:
             st.dataframe(driver_df, use_container_width=True)
         else:
