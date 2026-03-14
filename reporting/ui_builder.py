@@ -19,6 +19,7 @@ def build_investigation_ui(report):
 
     for a in anomalies:
         diagnosis = a.get("diagnosis") or {}
+        metric_branches = a.get("metric_branches", []) or []
 
         # 1) summary
         ui["summary_cards"].append({
@@ -41,46 +42,110 @@ def build_investigation_ui(report):
             ]
         })
 
-        # 3) top dimensions
-        dim_rows = []
-        for d in a.get("top_dimensions", [])[:3]:
-            dim_rows.append({
-                "dimension": d.get("dimension"),
-                "dimension_pct": d.get("dimension_pct"),
-                "segments": [
-                    {
-                        "segment": s.get("segment"),
-                        "focus_value": s.get("focus_value"),
-                        "baseline_value": s.get("baseline_value"),
-                        "change": s.get("change"),
-                        "segment_pct_within_dimension": s.get("segment_pct_within_dimension"),
-                    }
-                    for s in d.get("segments", [])
-                    if s.get("segment") != "__OTHER__"
-                ]
-            })
+        # 3) dimension tables (multi-branch)
+        dim_branch_rows = []
 
+        if metric_branches:
+
+            for branch in metric_branches[:2]:
+                branch_dim_rows = []
+
+                for d in branch.get("top_dimensions", [])[:3]:
+                    branch_dim_rows.append({
+                        "dimension": d.get("dimension"),
+                        "dimension_pct": d.get("dimension_pct"),
+                        "segments": [
+                            {
+                                "segment": s.get("segment"),
+                                "focus_value": s.get("focus_value"),
+                                "baseline_value": s.get("baseline_value"),
+                                "change": s.get("change"),
+                                "segment_pct_within_dimension": s.get("segment_pct_within_dimension"),
+                            }
+                            for s in d.get("segments", [])
+                            if s.get("segment") != "__OTHER__"
+                        ]
+                    })
+
+                dim_branch_rows.append({
+                    "metric": branch.get("metric"),
+                    "metric_contribution_pct": branch.get("metric_contribution_pct"),
+                    "rows": branch_dim_rows
+                })
+        else:
+            fallback_rows = []
+            for d in a.get("top_dimensions", [])[:3]:
+                fallback_rows.append({
+                    "dimension": d.get("dimension"),
+                    "dimension_pct": d.get("dimension_pct"),
+                    "segments": [
+                        {
+                            "segment": s.get("segment"),
+                            "focus_value": s.get("focus_value"),
+                            "baseline_value": s.get("baseline_value"),
+                            "change": s.get("change"),
+                            "segment_pct_within_dimension": s.get("segment_pct_within_dimension"),
+                        }
+                        for s in d.get("segments", [])
+                        if s.get("segment") != "__OTHER__"
+                    ]
+                })
+
+            dim_branch_rows.append({
+                "metric": a.get("driver_metric"),
+                "metric_contribution_pct": None,
+                "rows": fallback_rows
+            })
+        
         ui["dimension_tables"].append({
             "date": a.get("date"),
-            "rows": dim_rows
+            "branches": dim_branch_rows
         })
 
-        # 4) top drivers
-        driver_rows = []
-        for d in a.get("top_drivers", [])[:5]:
-            driver_rows.append({
-                "dimension": d.get("dimension"),
-                "segment": d.get("segment"),
-                "focus_value": d.get("focus_value"),
-                "baseline_value": d.get("baseline_value"),
-                "change": d.get("change"),
-                "contribution": d.get("contribution"),
+        driver_branch_rows = []
+
+        if metric_branches:
+            for branch in metric_branches[:2]:
+                branch_driver_rows = []
+
+                for d in branch.get("top_drivers", [])[:5]:
+                    branch_driver_rows.append({
+                        "dimension": d.get("dimension"),
+                        "segment": d.get("segment"),
+                        "focus_value": d.get("focus_value"),
+                        "baseline_value": d.get("baseline_value"),
+                        "change": d.get("change"),
+                        "contribution": d.get("contribution"),
+                    })
+
+                driver_branch_rows.append({
+                    "metric": branch.get("metric"),
+                    "metric_contribution_pct": branch.get("metric_contribution_pct"),
+                    "rows": branch_driver_rows
+                })
+        else:
+            # backward compatibility
+            fallback_driver_rows = []
+            for d in a.get("top_drivers", [])[:5]:
+                fallback_driver_rows.append({
+                    "dimension": d.get("dimension"),
+                    "segment": d.get("segment"),
+                    "focus_value": d.get("focus_value"),
+                    "baseline_value": d.get("baseline_value"),
+                    "change": d.get("change"),
+                    "contribution": d.get("contribution"),
+                })
+
+            driver_branch_rows.append({
+                "metric": a.get("driver_metric"),
+                "metric_contribution_pct": None,
+                "rows": fallback_driver_rows
             })
 
         ui["driver_tables"].append({
             "date": a.get("date"),
-            "rows": driver_rows
-        })
+            "branches": driver_branch_rows
+        })          
 
     return deep_convert(ui)
 

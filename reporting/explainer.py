@@ -26,8 +26,7 @@ def explain_investigation_template(report):
         diagnosis_type = diagnosis.get("diagnosis_type")
         contribution_pct = diagnosis.get("component_contribution_pct") or {}
 
-        top_dimensions = a.get("top_dimensions", [])[:3]
-        top_drivers = a.get("top_drivers", [])[:3]
+        metric_branches = a.get("metric_branches", []) or []
 
         line = []
 
@@ -39,9 +38,10 @@ def explain_investigation_template(report):
         )
 
         # ---------- metric diagnosis ----------
-        if driver_metric:
+        primary_driver_metric = diagnosis.get("primary_driver_metric")
+        if primary_driver_metric:
             line.append(
-                f"The primary driver metric was {driver_metric}"
+                f"The primary driver metric was {primary_driver_metric}"
                 + (f" ({diagnosis_type})." if diagnosis_type else ".")
             )
 
@@ -63,51 +63,123 @@ def explain_investigation_template(report):
                 + "."
             )
 
-        # ---------- top dimensions ----------
-        if top_dimensions:
-            dim_texts = []
+        # ---------- metric branches ----------
+        if metric_branches:
+            branch_texts = []
 
-            for d in top_dimensions:
-                dim_name = d.get("dimension")
-                dim_pct = d.get("dimension_pct")
+            for idx, branch in enumerate(metric_branches[:2], start=1):
 
-                # 每个 dimension 只展示前 3 个 segment，避免太长
-                visible_segments = []
-                for s in d.get("segments", [])[:3]:
-                    seg_name = s.get("segment")
-                    seg_pct = s.get("segment_pct_within_dimension")
+                branch_metric = branch.get("metric")
+                branch_pct = branch.get("metric_contribution_pct")
+                top_dimensions = branch.get("top_dimensions", [])[:2]
+                top_drivers = branch.get("top_drivers", [])[:2]
 
-                    if seg_name == "__OTHER__":
-                        continue
+                branch_parts = []
 
-                    visible_segments.append(
-                        f"{seg_name} ({format_pct(seg_pct)})"
+                prefix = "Primary branch" if idx == 1 else "Secondary branch"
+                branch_parts.append(
+                    f"{prefix}: {branch_metric}"
+                    + (
+                        f" ({format_pct(branch_pct)} of total metric change)"
+                        if branch_pct is not None else ""
+                    )
+                )
+
+                dim_texts = []
+                for d in top_dimensions:
+
+                    dim_name = d.get("dimension")
+                    dim_pct = d.get("dimension_pct")
+
+
+                    visible_segments = []
+                    for s in d.get("segments", [])[:3]:
+                        seg_name = s.get("segment")
+                        seg_pct = s.get("segment_pct_within_dimension")
+
+                        if seg_name == "__OTHER__":
+                            continue
+
+                        visible_segments.append(
+                            f"{seg_name} ({format_pct(seg_pct)})"
+                        )
+
+                    dim_text = f"{dim_name}"
+                    if dim_pct is not None:
+                        dim_text += f" ({format_pct(dim_pct)})"
+                    if visible_segments:
+                        dim_text += ": " + ", ".join(visible_segments)
+
+                    dim_texts.append(dim_text)
+
+                if dim_texts:
+                        branch_parts.append(
+                            "top dimensions: " + "; ".join(dim_texts)
+                        )
+
+                # ---------- top drivers ----------
+                if top_drivers:
+                    driver_text = "; ".join(
+                        f"{d.get('dimension')} → {d.get('segment')}"
+                        + (
+                            f" ({format_pct(d.get('contribution'))})"
+                            if d.get("contribution") is not None else ""
+                        )
+                        for d in top_drivers
+                    )
+                    branch_parts.append("top drivers: " + driver_text)
+
+                branch_texts.append(", ".join(branch_parts))
+
+            if branch_texts:
+                line.append("Branch-level RCA: " + " | ".join(branch_texts) + ".")
+        else:
+            # fallback for old single-branch format
+            top_dimensions = a.get("top_dimensions", [])[:3]
+            top_drivers = a.get("top_drivers", [])[:3]
+
+            if top_dimensions:
+                dim_texts = []
+
+                for d in top_dimensions:
+                    dim_name = d.get("dimension")
+                    dim_pct = d.get("dimension_pct")
+
+                    visible_segments = []
+                    for s in d.get("segments", [])[:3]:
+                        seg_name = s.get("segment")
+                        seg_pct = s.get("segment_pct_within_dimension")
+
+                        if seg_name == "__OTHER__":
+                            continue
+
+                        visible_segments.append(
+                            f"{seg_name} ({format_pct(seg_pct)})"
+                        )
+
+                    dim_text = f"{dim_name} ({format_pct(dim_pct)})"
+                    if visible_segments:
+                        dim_text += ": " + ", ".join(visible_segments)
+
+                    dim_texts.append(dim_text)
+
+                if dim_texts:
+                    line.append(
+                        "Top dimensions contributing to the change were: "
+                        + "; ".join(dim_texts)
+                        + "."
                     )
 
-                dim_text = f"{dim_name} ({format_pct(dim_pct)})"
-                if visible_segments:
-                    dim_text += ": " + ", ".join(visible_segments)
-
-                dim_texts.append(dim_text)
-
-            if dim_texts:
-                line.append(
-                    "Top dimensions contributing to the change were: "
-                    + "; ".join(dim_texts)
-                    + "."
+            if top_drivers:
+                driver_text = "; ".join(
+                    f"{d.get('dimension')} → {d.get('segment')}"
+                    + (
+                        f" ({format_pct(d.get('contribution'))})"
+                        if d.get("contribution") is not None else ""
+                    )
+                    for d in top_drivers
                 )
-
-        # ---------- top drivers ----------
-        if top_drivers:
-            driver_text = "; ".join(
-                f"{d.get('dimension')} → {d.get('segment')}"
-                + (
-                    f" ({format_pct(d.get('contribution'))})"
-                    if d.get("contribution") is not None else ""
-                )
-                for d in top_drivers
-            )
-            line.append(f"Additional top driver patterns: {driver_text}.")
+                line.append(f"Additional top driver patterns: {driver_text}.")
 
         parts.append(" ".join(line))
 
